@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8' />
+    <title>ベクトルタイルの表示</title>
+    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+    <script src='https://unpkg.com/maplibre-gl@2.0.0/dist/maplibre-gl.js'></script>
+    <link href='https://unpkg.com/maplibre-gl@2.0.0/dist/maplibre-gl.css' rel='stylesheet' />
+    <style>
+        body { margin:0; padding:0; }
+        #map { position:absolute; top:0; bottom:0; width:100%; }
+    </style>
+</head>
+<body>
+<div id='map'></div>
+<script>
+var map = new maplibregl.Map({
+    container: 'map',
+    style: {
+        version: 8,
+        glyphs: 'https://fonts.openmaptiles.org/{fontstack}/{range}.pbf', // この行を追加
+        sources: {
+            'raster-tiles': {
+                type: 'raster',
+                tiles: ['https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png'],
+                tileSize: 256,
+                attribution: '国土地理院'
+            }
+        },
+        layers: [{
+            id: 'simple-tiles',
+            type: 'raster',
+            source: 'raster-tiles',
+            minzoom: 0,
+            maxzoom: 22
+        }]
+    },
+    center: [139.6917, 35.6895], // 東京
+    zoom: 10
+});
+
+map.on('load', function() {
+    map.addSource('your-vector-tile', {
+        'type': 'vector',
+        'url': "https://nakamori1024.github.io/test_vector/tiles/tiles.json"
+    });
+
+    // 円を表示する
+    map.addLayer({
+        id: "circle",
+        type: "circle",
+        source: 'your-vector-tile',
+        'source-layer': 'g-simplestyle-v1',
+        'paint': {
+            "circle-color": "#eb5c0b",
+            "circle-opacity": 0.8,
+            "circle-radius": 10
+        }
+    });
+
+    map.addLayer({
+        id: "label",
+        source: 'your-vector-tile',
+        "source-layer": "g-simplestyle-v1",
+        type: "symbol",
+        paint: {
+            "text-color": ["string", ["get", "text-color"], "#000000"]
+        },
+        layout: {
+            "text-field": ["get", "観測所"],
+            "text-font": ["Open Sans Regular"],
+            "text-size": 18,
+            "text-allow-overlap": false
+        }
+    })
+});
+</script>
+</body>
+</html>
